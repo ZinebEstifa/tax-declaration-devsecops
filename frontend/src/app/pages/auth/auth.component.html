@@ -1,0 +1,32 @@
+<div class="auth-container">
+  <mat-card class="auth-card">
+    <mat-card-header>
+      <mat-card-title>🏛️ DGI - Portail Contribuable</mat-card-title>
+      <mat-card-subtitle>Système de Déclaration Fiscale (SIMPL)</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Numéro Fiscal</mat-label>
+          <input matInput formControlName="numFiscal" placeholder="Ex: 12345678">
+          <mat-icon matSuffix>business</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Mot de passe</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <div *ngIf="errorMessage" class="error-msg">⚠️ {{ errorMessage }}</div>
+
+        <button mat-raised-button color="primary" type="submit" class="full-width submit-btn" [disabled]="loginForm.invalid">
+          Se Connecter
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

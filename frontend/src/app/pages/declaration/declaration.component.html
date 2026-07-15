@@ -1,0 +1,56 @@
+<div class="page-container">
+  <form [formGroup]="declarationForm" (ngSubmit)="submitDeclaration()">
+    
+    <!-- Section Produits -->
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>💰 Produits (Recettes)</mat-card-title></mat-card-header>
+      <mat-card-content formArrayName="produits">
+        <div *ngFor="let prod of produits.controls; let i = index" [formGroupName]="i" class="row">
+          <mat-form-field appearance="outline" class="flex-2">
+            <input matInput formControlName="libelle" placeholder="Libellé du produit">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-1">
+            <input matInput type="number" formControlName="montant" placeholder="Montant DH" (input)="calculateTotals()">
+          </mat-form-field>
+          <button mat-icon-button color="warn" (click)="removeProduit(i); calculateTotals()"><mat-icon>delete</mat-icon></button>
+        </div>
+        <button mat-stroked-button color="primary" type="button" (click)="addProduit()">+ Ajouter un produit</button>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Section Charges -->
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>💸 Charges (Dépenses)</mat-card-title></mat-card-header>
+      <mat-card-content formArrayName="charges">
+        <div *ngFor="let charge of charges.controls; let i = index" [formGroupName]="i" class="row">
+          <mat-form-field appearance="outline" class="flex-2">
+            <input matInput formControlName="libelle" placeholder="Libellé de la charge">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-1">
+            <input matInput type="number" formControlName="montant" placeholder="Montant DH" (input)="calculateTotals()">
+          </mat-form-field>
+          <button mat-icon-button color="warn" (click)="removeCharge(i); calculateTotals()"><mat-icon>delete</mat-icon></button>
+        </div>
+        <button mat-stroked-button color="primary" type="button" (click)="addCharge()">+ Ajouter une charge</button>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Résumé Fiscale (Calcul automatique) -->
+    <mat-card class="summary-card">
+      <mat-card-header><mat-card-title>📊 Résumé de la Déclaration</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div class="summary-row"><span>Résultat Net :</span> <strong>{{ resultatNet | number:'1.2-2' }} DH</strong></div>
+        <div class="summary-row"><span>Impôt Progressif :</span> <strong>{{ impot | number:'1.2-2' }} DH</strong></div>
+        <div class="summary-row penalty" *ngIf="penalite > 0"><span>Pénalité de Retard (10%) :</span> <strong>{{ penalite | number:'1.2-2' }} DH</strong></div>
+        <mat-divider></mat-divider>
+        <div class="summary-row total"><span>TOTAL À PAYER :</span> <strong>{{ totalAPayer | number:'1.2-2' }} DH</strong></div>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-raised-button color="accent" type="submit" [disabled]="declarationForm.invalid">
+          🚀 Déposer Officiellement
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+  </form>
+</div>

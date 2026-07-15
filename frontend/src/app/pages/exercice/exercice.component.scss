@@ -1,0 +1,58 @@
+/* Conteneur principal qui centre la carte sur l'écran */
+.page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Prend toute la hauteur de l'écran */
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* Fond dégradé doux et pro */
+  padding: 20px;
+}
+
+/* Style de la carte (le cadre blanc) */
+.form-card {
+  width: 100%;
+  max-width: 600px; /* Ne dépasse pas 600px de large pour rester lisible */
+  padding: 30px;
+  border-radius: 16px; /* Coins arrondis modernes */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Ombre douce pour un effet de profondeur */
+  background-color: #ffffff;
+
+  /* En-tête de la carte */
+  mat-card-header {
+    margin-bottom: 25px;
+    text-align: center;
+    
+    mat-card-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1e3c72; /* Bleu institutionnel rappelant la DGI */
+    }
+  }
+
+  /* Champs de saisie prenant toute la largeur */
+  .full-width {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  /* Zone des boutons d'action */
+  mat-card-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end; /* Pousse le bouton à droite */
+
+    button {
+      padding: 10px 24px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animation fluide */
+
+      /* Petit effet créatif au survol de la souris */
+      &:hover {
+        transform: translateY(-2px); /* Le bouton "monte" légèrement */
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+      }
+    }
+  }
+}

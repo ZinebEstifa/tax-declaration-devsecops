@@ -1,0 +1,9 @@
+.page-container { padding: 20px; max-width: 1000px; margin: auto; }
+.section-card, .summary-card { margin-bottom: 20px; padding: 20px; }
+.row { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; }
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+.summary-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 16px; }
+.penalty { color: #d32f2f; }
+.total { font-size: 20px; color: #1e3c72; font-weight: bold; padding-top: 15px; }
+mat-divider { margin: 10px 0; }
