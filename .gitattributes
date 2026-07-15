@@ -1,2 +1,25 @@
-/mvnw text eol=lf
-*.cmd text eol=crlf
+# Forcer LF pour tous les fichiers texte
+* text=auto eol=lf
+
+# Fichiers spécifiques à traiter en binaire (pas de conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# Fichiers critiques pour Docker et CI/CD (toujours LF)
+Dockerfile text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.ts text eol=lf
+*.html text eol=lf
+*.scss text eol=lf
+*.css text eol=lf
