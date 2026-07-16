@@ -1,6 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TaxService } from '../../services/tax.service';
+import { AuthService } from '../../services/auth.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -21,6 +23,8 @@ import { MatDividerModule } from '@angular/material/divider';
 export class DeclarationComponent implements OnInit {
   private fb = inject(FormBuilder);
   private taxService = inject(TaxService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   totalProduits = 0;
   totalCharges = 0;
@@ -74,5 +78,10 @@ export class DeclarationComponent implements OnInit {
   submitDeclaration() {
     alert(`Déclaration enregistrée ! Impôt: ${this.impot} DH, Pénalité: ${this.penalite} DH`);
     // Ici, appel au backend Spring Boot via HttpClient
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

@@ -1,58 +1,188 @@
-/* Conteneur principal qui centre la carte sur l'écran */
+// Main Page Container
 .page-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: 100vh; /* Prend toute la hauteur de l'écran */
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* Fond dégradé doux et pro */
-  padding: 20px;
+  min-height: calc(100vh - 70px);
+  padding: 40px 20px;
+  background-color: var(--dgi-bg);
+  box-sizing: border-box;
 }
 
-/* Style de la carte (le cadre blanc) */
+// Form Card Style
 .form-card {
   width: 100%;
-  max-width: 600px; /* Ne dépasse pas 600px de large pour rester lisible */
-  padding: 30px;
-  border-radius: 16px; /* Coins arrondis modernes */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); /* Ombre douce pour un effet de profondeur */
-  background-color: #ffffff;
+  max-width: 640px;
+  padding: 35px 30px;
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  background-color: white;
+  box-shadow: var(--shadow-lg);
+  box-sizing: border-box;
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 
-  /* En-tête de la carte */
-  mat-card-header {
-    margin-bottom: 25px;
-    text-align: center;
+  .header-icon-container {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--dgi-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
     
-    mat-card-title {
-      font-size: 22px;
-      font-weight: 600;
-      color: #1e3c72; /* Bleu institutionnel rappelant la DGI */
+    .header-icon {
+      color: var(--dgi-primary);
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
     }
   }
 
-  /* Champs de saisie prenant toute la largeur */
-  .full-width {
-    width: 100%;
-    margin-bottom: 20px;
+  mat-card-header {
+    padding: 0;
+    margin-bottom: 25px;
+    display: block;
+
+    mat-card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dgi-primary);
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    mat-card-subtitle {
+      font-size: 13px;
+      color: var(--dgi-text-muted);
+      line-height: 1.4;
+    }
   }
 
-  /* Zone des boutons d'action */
-  mat-card-actions {
-    margin-top: 20px;
+  mat-card-content {
+    padding: 0;
+  }
+
+  .exercice-form {
     display: flex;
-    justify-content: flex-end; /* Pousse le bouton à droite */
+    flex-direction: column;
+    gap: 15px;
+  }
 
-    button {
-      padding: 10px 24px;
-      font-size: 16px;
+  .form-row {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+  }
+
+  .input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .custom-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dgi-primary);
+      margin-bottom: 6px;
+    }
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  ::v-deep .mat-mdc-text-field-wrapper {
+    background-color: white !important;
+    border-radius: 10px !important;
+    transition: all 0.3s ease;
+  }
+
+  // Warning/Info Alert banner
+  .info-alert {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 16px;
+    background-color: var(--dgi-warning-light);
+    border: 1px solid rgba(217, 119, 6, 0.15);
+    border-radius: 12px;
+    margin-top: 10px;
+
+    mat-icon {
+      color: var(--dgi-warning);
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      color: #78350f;
+      line-height: 1.5;
       font-weight: 500;
-      border-radius: 8px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease; /* Animation fluide */
+    }
+  }
 
-      /* Petit effet créatif au survol de la souris */
-      &:hover {
-        transform: translateY(-2px); /* Le bouton "monte" légèrement */
-        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
-      }
+  .card-actions {
+    padding: 20px 0 0 0;
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .next-btn {
+    height: 48px;
+    padding: 0 24px !important;
+    border-radius: 10px !important;
+    font-size: 14px;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--dgi-primary) 0%, var(--dgi-primary-light) 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(10, 37, 64, 0.15);
+
+    &:not([disabled]):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(10, 37, 64, 0.25);
+    }
+
+    &[disabled] {
+      background: #e2e8f0 !important;
+      color: #94a3b8 !important;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-left: 4px;
+    }
+  }
+}
+
+// Responsive layout
+@media (max-width: 600px) {
+  .dgi-navbar {
+    padding: 0 20px;
+    
+    .user-badge {
+      display: none !important; // Hide badge on small screens
+    }
+  }
+  .form-card {
+    padding: 24px 20px;
+    
+    .form-row {
+      flex-direction: column;
+      gap: 0;
     }
   }
 }

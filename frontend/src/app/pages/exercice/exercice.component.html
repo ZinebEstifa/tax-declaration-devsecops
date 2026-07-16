@@ -1,31 +1,92 @@
-<div class="page-container">
-  <mat-card class="form-card">
-    <mat-card-header>
-      <mat-card-title>📅 Étape 2 : Période de l'Exercice Fiscal</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="exerciceForm">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Date de début</mat-label>
-          <input matInput [matDatepicker]="pickerDebut" formControlName="dateDebut">
-          <mat-datepicker-toggle matSuffix [for]="pickerDebut"></mat-datepicker-toggle>
-          <mat-datepicker #pickerDebut></mat-datepicker>
-        </mat-form-field>
+<!-- Navbar -->
+<header class="dgi-navbar">
+  <div class="navbar-left">
+    <img src="logo-dgi.png" alt="DGI Maroc Logo" class="dgi-logo-mini-img">
+    <div class="navbar-brand">
+      <span class="navbar-title">DGI Maroc</span>
+      <span class="navbar-subtitle">Espace SIMPL Contribuable</span>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="user-badge">
+      <mat-icon>account_circle</mat-icon>
+      <span>Contribuable IF: 12345678</span>
+    </div>
+    <button mat-icon-button (click)="logout()" title="Se déconnecter" class="logout-btn">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </div>
+</header>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Date de fin</mat-label>
-          <input matInput [matDatepicker]="pickerFin" formControlName="dateFin">
-          <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
-          <mat-datepicker #pickerFin></mat-datepicker>
-          <mat-error *ngIf="exerciceForm.get('dateFin')?.hasError('dureeInvalid')">
-            La durée de l'exercice ne peut pas dépasser 365 jours.
-          </mat-error>
-        </mat-form-field>
+<div class="page-container">
+  <!-- Stepper de progression -->
+  <div class="dgi-stepper">
+    <div class="step completed">
+      <div class="step-number">1</div>
+      <span>Identification</span>
+    </div>
+    <div class="step-divider active"></div>
+    <div class="step active">
+      <div class="step-number">2</div>
+      <span>Exercice Fiscal</span>
+    </div>
+    <div class="step-divider"></div>
+    <div class="step">
+      <div class="step-number">3</div>
+      <span>Déclaration</span>
+    </div>
+  </div>
+
+  <!-- Formulaire d'exercice -->
+  <mat-card class="form-card animate-card">
+    <mat-card-header>
+      <div class="header-icon-container">
+        <mat-icon class="header-icon">date_range</mat-icon>
+      </div>
+      <mat-card-title>Période de l'Exercice Fiscal</mat-card-title>
+      <mat-card-subtitle>Déterminez les dates de début et de fin de l'exercice comptable à déclarer</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form [formGroup]="exerciceForm" class="exercice-form">
+        
+        <div class="form-row">
+          <!-- Date de début -->
+          <div class="input-group">
+            <label class="custom-label">Date de début de l'exercice</label>
+            <mat-form-field appearance="outline" class="full-width">
+              <input matInput [matDatepicker]="pickerDebut" formControlName="dateDebut" placeholder="JJ/MM/AAAA">
+              <mat-datepicker-toggle matSuffix [for]="pickerDebut"></mat-datepicker-toggle>
+              <mat-datepicker #pickerDebut></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <!-- Date de fin -->
+          <div class="input-group">
+            <label class="custom-label">Date de fin de l'exercice</label>
+            <mat-form-field appearance="outline" class="full-width">
+              <input matInput [matDatepicker]="pickerFin" formControlName="dateFin" placeholder="JJ/MM/AAAA">
+              <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin></mat-datepicker>
+              <mat-error *ngIf="exerciceForm.get('dateFin')?.hasError('dureeInvalid')">
+                ⚠️ La durée de l'exercice ne peut pas dépasser 365 jours.
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="info-alert">
+          <mat-icon>info</mat-icon>
+          <p>Conformément à la réglementation fiscale en vigueur, un exercice comptable normal s'étend sur une durée maximale de 12 mois (365 jours).</p>
+        </div>
+
       </form>
     </mat-card-content>
-    <mat-card-actions align="end">
-      <button mat-raised-button color="primary" (click)="next()" [disabled]="exerciceForm.invalid">
-        Suivant : Déclaration ➡️
+    
+    <mat-card-actions align="end" class="card-actions">
+      <button mat-flat-button class="next-btn" (click)="next()" [disabled]="exerciceForm.invalid">
+        Suivant : Déclaration des flux
+        <mat-icon>arrow_forward</mat-icon>
       </button>
     </mat-card-actions>
   </mat-card>

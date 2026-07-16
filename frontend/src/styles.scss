@@ -1,9 +1,29 @@
 // Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+
+:root {
+  --dgi-primary: #005fa9;
+  --dgi-primary-light: #0076cb;
+  --dgi-secondary: #003b73;
+  --dgi-secondary-light: #4ba3e3;
+  --dgi-accent: #005fa9;
+  --dgi-accent-light: #e6f2fc;
+  --dgi-danger: #d9381e;
+  --dgi-danger-light: #fdf2f0;
+  --dgi-warning: #b27a00;
+  --dgi-warning-light: #fffcf0;
+  --dgi-success: #007acc;
+  --dgi-success-light: #f0f7fd;
+  --dgi-bg: #f5f8fa;
+  --dgi-card-bg: rgba(255, 255, 255, 0.95);
+  --dgi-text-main: #1a2c3d;
+  --dgi-text-muted: #6b7c93;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
 
 html {
   height: 100%;
@@ -13,27 +33,209 @@ html {
         primary: mat.$azure-palette,
         tertiary: mat.$blue-palette,
       ),
-      typography: Roboto,
+      typography: Outfit,
       density: 0,
     )
   );
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
   color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
+  background-color: var(--dgi-bg);
+  color: var(--dgi-text-main);
+  font-family: 'Outfit', sans-serif;
   margin: 0;
   height: 100%;
 }
-/* You can add global styles to this file, and also import other style files */
+
+/* Animations Globales */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(197, 160, 89, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(197, 160, 89, 0.8);
+  }
+}
+
+/* Styles communs pour le Stepper de progression (En-tête commun) */
+.dgi-stepper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin: 0 auto 30px auto;
+  max-width: 600px;
+  background: white;
+  padding: 15px 25px;
+  border-radius: 50px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--dgi-text-muted);
+    font-size: 14px;
+    position: relative;
+    transition: all 0.3s ease;
+
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--dgi-gray-200);
+      color: var(--dgi-text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    &.active {
+      color: var(--dgi-primary);
+      font-weight: 600;
+      .step-number {
+        background: var(--dgi-primary);
+        color: white;
+        box-shadow: 0 0 10px rgba(10, 37, 64, 0.3);
+      }
+    }
+
+    &.completed {
+      color: var(--dgi-secondary);
+      .step-number {
+        background: var(--dgi-secondary);
+        color: white;
+      }
+    }
+  }
+
+  .step-divider {
+    height: 2px;
+    flex-grow: 1;
+    max-width: 50px;
+    background: var(--dgi-gray-200);
+    border-radius: 2px;
+    
+    &.active {
+      background: var(--dgi-secondary);
+    }
+  }
+}
+
+// DGI Custom Header Navigation (Global)
+.dgi-navbar {
+  height: 70px;
+  background: white;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  font-family: 'Outfit', sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .dgi-logo-mini-img {
+      max-height: 45px;
+      width: auto;
+      border-radius: 6px;
+      background: white;
+      padding: 4px 8px;
+      box-shadow: var(--shadow-sm);
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .navbar-brand {
+      display: flex;
+      flex-direction: column;
+
+      .navbar-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dgi-primary);
+        letter-spacing: -0.3px;
+      }
+
+      .navbar-subtitle {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--dgi-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--dgi-bg);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dgi-primary);
+      border: 1px solid rgba(226, 232, 240, 0.5);
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: var(--dgi-text-muted);
+      }
+    }
+
+    .logout-btn {
+      color: var(--dgi-danger);
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: scale(1.05);
+        background-color: var(--dgi-danger-light);
+      }
+    }
+  }
+}
+

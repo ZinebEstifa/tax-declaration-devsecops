@@ -1,32 +1,93 @@
-<div class="auth-container">
-  <mat-card class="auth-card">
-    <mat-card-header>
-      <mat-card-title>🏛️ DGI - Portail Contribuable</mat-card-title>
-      <mat-card-subtitle>Système de Déclaration Fiscale (SIMPL)</mat-card-subtitle>
-    </mat-card-header>
+<div class="auth-wrapper">
+  <!-- Left Side: Decorative & Informative Portal Intro -->
+  <div class="brand-panel">
+    <div class="brand-bg-pattern"></div>
+    <div class="brand-content">
+      <div class="logo-wrapper">
+        <img src="logo-dgi.png" alt="DGI Maroc Logo" class="dgi-logo-img">
+      </div>
+      
+      <div class="brand-text">
+        <span class="country-label">ROYAUME DU MAROC</span>
+        <h1>Direction Générale des Impôts</h1>
+        <p class="brand-subtitle">Portail de déclaration et de télépaiement des impôts en ligne (SIMPL).</p>
+      </div>
+      
+      <div class="features-list">
+        <div class="feature-item">
+          <div class="feature-icon">🛡️</div>
+          <div class="feature-desc">
+            <h3>Accès Sécurisé</h3>
+            <p>Vos déclarations sont protégées par chiffrement de bout en bout conforme aux normes nationales.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-desc">
+            <h3>Traitement Instantané</h3>
+            <p>Calcul automatique de l'impôt progressif et des pénalités en temps réel.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="brand-footer">
+        <p>© 2026 Direction Générale des Impôts. Tous droits réservés.</p>
+      </div>
+    </div>
+  </div>
 
-    <mat-card-content>
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Numéro Fiscal</mat-label>
-          <input matInput formControlName="numFiscal" placeholder="Ex: 12345678">
-          <mat-icon matSuffix>business</mat-icon>
-        </mat-form-field>
+  <!-- Right Side: Login Form -->
+  <div class="form-panel">
+    <div class="login-card-container">
+      <mat-card class="auth-card">
+        <mat-card-header>
+          <mat-card-title>Espace Professionnel</mat-card-title>
+          <mat-card-subtitle>Connectez-vous à votre espace contribuable</mat-card-subtitle>
+        </mat-card-header>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Mot de passe</mat-label>
-          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
-          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
-            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
-        </mat-form-field>
+        <mat-card-content>
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+            
+            <div class="input-group">
+              <label class="custom-label">Identifiant Fiscal (IF)</label>
+              <mat-form-field appearance="outline" class="full-width">
+                <input matInput formControlName="numFiscal" placeholder="Ex: 12345678" autocomplete="username">
+                <mat-icon matSuffix>business</mat-icon>
+                <mat-error *ngIf="loginForm.get('numFiscal')?.hasError('pattern')">
+                  L'Identifiant Fiscal doit comporter au moins 8 chiffres.
+                </mat-error>
+              </mat-form-field>
+            </div>
 
-        <div *ngIf="errorMessage" class="error-msg">⚠️ {{ errorMessage }}</div>
+            <div class="input-group">
+              <label class="custom-label">Mot de passe</label>
+              <mat-form-field appearance="outline" class="full-width">
+                <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="Saisir votre mot de passe" autocomplete="current-password">
+                <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button" class="visibility-btn">
+                  <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                </button>
+                <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">
+                  Le mot de passe doit contenir au moins 6 caractères.
+                </mat-error>
+              </mat-form-field>
+            </div>
 
-        <button mat-raised-button color="primary" type="submit" class="full-width submit-btn" [disabled]="loginForm.invalid">
-          Se Connecter
-        </button>
-      </form>
-    </mat-card-content>
-  </mat-card>
+            <div *ngIf="errorMessage" class="error-msg shake-animation">
+              <mat-icon>warning</mat-icon>
+              <span>{{ errorMessage }}</span>
+            </div>
+
+            <button mat-flat-button type="submit" class="full-width submit-btn" [disabled]="loginForm.invalid">
+              S'authentifier
+              <mat-icon>login</mat-icon>
+            </button>
+          </form>
+        </mat-card-content>
+      </mat-card>
+      
+      <div class="support-link">
+        <span>Besoin d'aide ? </span><a href="https://www.tax.gov.ma" target="_blank">Consulter le guide de connexion</a>
+      </div>
+    </div>
+  </div>
 </div>

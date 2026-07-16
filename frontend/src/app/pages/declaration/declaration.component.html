@@ -1,56 +1,218 @@
+<!-- Navbar -->
+<header class="dgi-navbar">
+  <div class="navbar-left">
+    <img src="logo-dgi.png" alt="DGI Maroc Logo" class="dgi-logo-mini-img">
+    <div class="navbar-brand">
+      <span class="navbar-title">DGI Maroc</span>
+      <span class="navbar-subtitle">Espace SIMPL Contribuable</span>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="user-badge">
+      <mat-icon>account_circle</mat-icon>
+      <span>Contribuable IF: 12345678</span>
+    </div>
+    <button mat-icon-button (click)="logout()" title="Se déconnecter" class="logout-btn">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </div>
+</header>
+
 <div class="page-container">
-  <form [formGroup]="declarationForm" (ngSubmit)="submitDeclaration()">
-    
-    <!-- Section Produits -->
-    <mat-card class="section-card">
-      <mat-card-header><mat-card-title>💰 Produits (Recettes)</mat-card-title></mat-card-header>
-      <mat-card-content formArrayName="produits">
-        <div *ngFor="let prod of produits.controls; let i = index" [formGroupName]="i" class="row">
-          <mat-form-field appearance="outline" class="flex-2">
-            <input matInput formControlName="libelle" placeholder="Libellé du produit">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="flex-1">
-            <input matInput type="number" formControlName="montant" placeholder="Montant DH" (input)="calculateTotals()">
-          </mat-form-field>
-          <button mat-icon-button color="warn" (click)="removeProduit(i); calculateTotals()"><mat-icon>delete</mat-icon></button>
-        </div>
-        <button mat-stroked-button color="primary" type="button" (click)="addProduit()">+ Ajouter un produit</button>
-      </mat-card-content>
-    </mat-card>
+  <!-- Stepper de progression -->
+  <div class="dgi-stepper">
+    <div class="step completed">
+      <div class="step-number">1</div>
+      <span>Identification</span>
+    </div>
+    <div class="step-divider active"></div>
+    <div class="step completed">
+      <div class="step-number">2</div>
+      <span>Exercice Fiscal</span>
+    </div>
+    <div class="step-divider active"></div>
+    <div class="step active">
+      <div class="step-number">3</div>
+      <span>Déclaration</span>
+    </div>
+  </div>
 
-    <!-- Section Charges -->
-    <mat-card class="section-card">
-      <mat-card-header><mat-card-title>💸 Charges (Dépenses)</mat-card-title></mat-card-header>
-      <mat-card-content formArrayName="charges">
-        <div *ngFor="let charge of charges.controls; let i = index" [formGroupName]="i" class="row">
-          <mat-form-field appearance="outline" class="flex-2">
-            <input matInput formControlName="libelle" placeholder="Libellé de la charge">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="flex-1">
-            <input matInput type="number" formControlName="montant" placeholder="Montant DH" (input)="calculateTotals()">
-          </mat-form-field>
-          <button mat-icon-button color="warn" (click)="removeCharge(i); calculateTotals()"><mat-icon>delete</mat-icon></button>
-        </div>
-        <button mat-stroked-button color="primary" type="button" (click)="addCharge()">+ Ajouter une charge</button>
-      </mat-card-content>
-    </mat-card>
+  <div class="declaration-layout">
+    <form [formGroup]="declarationForm" (ngSubmit)="submitDeclaration()" class="declaration-form">
+      
+      <!-- Left Column: Forms -->
+      <div class="forms-column">
+        <!-- Section Produits (Recettes) -->
+        <mat-card class="section-card products-card animate-card">
+          <mat-card-header>
+            <div class="header-icon-container products-icon">
+              <mat-icon>trending_up</mat-icon>
+            </div>
+            <mat-card-title>Produits (Recettes)</mat-card-title>
+            <mat-card-subtitle>Déclarez l'ensemble des produits d'exploitation encaissés durant l'exercice</mat-card-subtitle>
+          </mat-card-header>
 
-    <!-- Résumé Fiscale (Calcul automatique) -->
-    <mat-card class="summary-card">
-      <mat-card-header><mat-card-title>📊 Résumé de la Déclaration</mat-card-title></mat-card-header>
-      <mat-card-content>
-        <div class="summary-row"><span>Résultat Net :</span> <strong>{{ resultatNet | number:'1.2-2' }} DH</strong></div>
-        <div class="summary-row"><span>Impôt Progressif :</span> <strong>{{ impot | number:'1.2-2' }} DH</strong></div>
-        <div class="summary-row penalty" *ngIf="penalite > 0"><span>Pénalité de Retard (10%) :</span> <strong>{{ penalite | number:'1.2-2' }} DH</strong></div>
-        <mat-divider></mat-divider>
-        <div class="summary-row total"><span>TOTAL À PAYER :</span> <strong>{{ totalAPayer | number:'1.2-2' }} DH</strong></div>
-      </mat-card-content>
-      <mat-card-actions align="end">
-        <button mat-raised-button color="accent" type="submit" [disabled]="declarationForm.invalid">
-          🚀 Déposer Officiellement
-        </button>
-      </mat-card-actions>
-    </mat-card>
+          <mat-card-content>
+            <div class="ledger-header">
+              <div class="col-libelle">Désignation du Produit</div>
+              <div class="col-montant">Montant (DH)</div>
+              <div class="col-actions"></div>
+            </div>
 
-  </form>
+            <div formArrayName="produits" class="ledger-rows">
+              <div *ngFor="let prod of produits.controls; let i = index" [formGroupName]="i" class="ledger-row animate-row">
+                <div class="col-libelle">
+                  <mat-form-field appearance="outline" class="inline-field">
+                    <input matInput formControlName="libelle" placeholder="Ex: Vente de marchandises">
+                  </mat-form-field>
+                </div>
+                <div class="col-montant">
+                  <mat-form-field appearance="outline" class="inline-field">
+                    <input matInput type="number" formControlName="montant" placeholder="0.00" (input)="calculateTotals()">
+                    <span matSuffix class="dh-suffix">DH</span>
+                  </mat-form-field>
+                </div>
+                <div class="col-actions">
+                  <button mat-icon-button type="button" class="row-delete-btn" (click)="removeProduit(i); calculateTotals()" title="Supprimer la ligne">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button mat-stroked-button class="add-row-btn" type="button" (click)="addProduit()">
+              <mat-icon>add</mat-icon>
+              Ajouter une ligne de produit
+            </button>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Section Charges (Dépenses) -->
+        <mat-card class="section-card expenses-card animate-card">
+          <mat-card-header>
+            <div class="header-icon-container expenses-icon">
+              <mat-icon>trending_down</mat-icon>
+            </div>
+            <mat-card-title>Charges (Dépenses)</mat-card-title>
+            <mat-card-subtitle>Déclarez l'ensemble des charges d'exploitation déductibles engagées</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="ledger-header">
+              <div class="col-libelle">Nature de la Charge</div>
+              <div class="col-montant">Montant (DH)</div>
+              <div class="col-actions"></div>
+            </div>
+
+            <div formArrayName="charges" class="ledger-rows">
+              <div *ngFor="let charge of charges.controls; let i = index" [formGroupName]="i" class="ledger-row animate-row">
+                <div class="col-libelle">
+                  <mat-form-field appearance="outline" class="inline-field">
+                    <input matInput formControlName="libelle" placeholder="Ex: Achats de matières premières">
+                  </mat-form-field>
+                </div>
+                <div class="col-montant">
+                  <mat-form-field appearance="outline" class="inline-field">
+                    <input matInput type="number" formControlName="montant" placeholder="0.00" (input)="calculateTotals()">
+                    <span matSuffix class="dh-suffix">DH</span>
+                  </mat-form-field>
+                </div>
+                <div class="col-actions">
+                  <button mat-icon-button type="button" class="row-delete-btn" (click)="removeCharge(i); calculateTotals()" title="Supprimer la ligne">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button mat-stroked-button class="add-row-btn" type="button" (click)="addCharge()">
+              <mat-icon>add</mat-icon>
+              Ajouter une ligne de charge
+            </button>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Right Column: Live Summary -->
+      <div class="summary-column">
+        <mat-card class="summary-card animate-card">
+          <mat-card-header>
+            <div class="header-icon-container summary-icon">
+              <mat-icon>analytics</mat-icon>
+            </div>
+            <mat-card-title>Résumé de la Déclaration</mat-card-title>
+            <mat-card-subtitle>Calcul instantané basé sur les données saisies</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Visual Tax Bracket Gauge -->
+            <div class="tax-scale">
+              <span class="scale-title">Barème Fiscal Actif</span>
+              <div class="scale-bar">
+                <div class="scale-segment" [class.active]="resultatNet > 0 && resultatNet <= 100000">
+                  <span class="segment-label">10%</span>
+                  <span class="segment-range">≤ 100k DH</span>
+                </div>
+                <div class="scale-segment" [class.active]="resultatNet > 100000 && resultatNet <= 1000000">
+                  <span class="segment-label">20%</span>
+                  <span class="segment-range">100k - 1M</span>
+                </div>
+                <div class="scale-segment" [class.active]="resultatNet > 1000000">
+                  <span class="segment-label">30%</span>
+                  <span class="segment-range">> 1M DH</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="summary-details">
+              <div class="summary-row">
+                <span class="row-label">Total des Produits</span>
+                <span class="row-value positive">{{ totalProduits | number:'1.2-2' }} DH</span>
+              </div>
+              <div class="summary-row">
+                <span class="row-label">Total des Charges</span>
+                <span class="row-value negative">{{ totalCharges | number:'1.2-2' }} DH</span>
+              </div>
+              
+              <mat-divider></mat-divider>
+              
+              <div class="summary-row highlight-row">
+                <span class="row-label">Résultat Net Comptable</span>
+                <span class="row-value" [class.positive]="resultatNet >= 0" [class.negative]="resultatNet < 0">
+                  {{ resultatNet | number:'1.2-2' }} DH
+                </span>
+              </div>
+              
+              <div class="summary-row">
+                <span class="row-label">Impôt Brut (Progressif)</span>
+                <span class="row-value">{{ impot | number:'1.2-2' }} DH</span>
+              </div>
+
+              <!-- Penalties Alert if present -->
+              <div class="summary-row penalty-row" *ngIf="penalite > 0">
+                <span class="row-label">
+                  <mat-icon class="warning-icon">warning_amber</mat-icon>
+                  Majorations de retard (10%)
+                </span>
+                <span class="row-value negative">{{ penalite | number:'1.2-2' }} DH</span>
+              </div>
+
+              <div class="total-to-pay-box">
+                <span class="total-label">TOTAL À PAYER</span>
+                <span class="total-value">{{ totalAPayer | number:'1.2-2' }} DH</span>
+              </div>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions class="card-actions">
+            <button mat-flat-button type="submit" class="submit-declaration-btn" [disabled]="declarationForm.invalid">
+              <mat-icon>send</mat-icon>
+              Déposer Officiellement
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+
+    </form>
+  </div>
 </div>
