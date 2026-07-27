@@ -81,7 +81,7 @@ Assurez-vous d'avoir installé sur votre machine :
 ### 1️⃣ Cloner le Dépôt GitHub
 
 ```bash
-git clone https://github.com/votre-compte/Declarations-fiscaux.git
+git https://github.com/ZinebEstifa/tax-declaration-devsecops.git
 cd Declarations-fiscaux
 ```
 
@@ -213,6 +213,4 @@ cd backend
 
 ---
 
-## 👥 Auteur & Licence
 
-Développé dans le cadre du projet **SIMPL-IS DGI Maroc** avec le respect strict des normes de sécurité DevSecOps.
