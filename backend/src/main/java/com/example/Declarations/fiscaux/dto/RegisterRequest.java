@@ -8,11 +8,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
+public class RegisterRequest {
 
-    @NotBlank(message = "Le numéro fiscal est obligatoire")
+    @NotBlank(message = "Le numéro fiscal est obligatoire.")
     private String numFiscal;
 
-    @NotBlank(message = "Le mot de passe est obligatoire")
+    @NotBlank(message = "Le mot de passe est obligatoire.")
     private String password;
+
+    private String raisonSociale;
 }

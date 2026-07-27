@@ -1,7 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class TaxService {
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:8080/api/declarations';
   
   // Règle métier 1 : Calcul du Résultat Net
   calculateNetResult(products: number, charges: number): number {
@@ -37,5 +41,34 @@ export class TaxService {
       return taxAmount * 0.10; // Pénalité de 10%
     }
     return 0;
+  }
+
+  // --- API Backend ---
+  getDeclarations(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl);
+  }
+
+  getDeclarationById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
+  createDraft(declaration: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, declaration);
+  }
+
+  updateDraft(id: number, declaration: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, declaration);
+  }
+
+  validateDeclaration(id: number, declaration?: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/valider`, declaration || {});
+  }
+
+  rectifyDeclaration(id: number, declaration: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/rectifier`, declaration);
+  }
+
+  deposit(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/deposer`, {});
   }
 }

@@ -5,13 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
-    private boolean success;
-    private String token;
-    private String error;
-    private String numeroFiscal;
+public class ProduitResponse {
+    private Long id;
+    private String libelle;
+    private BigDecimal montant;
 }

@@ -10,7 +10,7 @@
   <div class="navbar-right">
     <div class="user-badge">
       <mat-icon>account_circle</mat-icon>
-      <span>Contribuable IF: 12345678</span>
+      <span>Contribuable IF: {{ numeroFiscal }}</span>
     </div>
     <button mat-icon-button (click)="logout()" title="Se déconnecter" class="logout-btn">
       <mat-icon>logout</mat-icon>
@@ -37,14 +37,77 @@
     </div>
   </div>
 
-  <!-- Formulaire d'exercice -->
+  <!-- Section 1 : Historique des Déclarations -->
+  <mat-card class="form-card animate-card history-card" *ngIf="declarations.length > 0">
+    <mat-card-header>
+      <div class="header-icon-container history-icon">
+        <mat-icon class="header-icon">history</mat-icon>
+      </div>
+      <mat-card-title>Mes Déclarations Fiscales</mat-card-title>
+      <mat-card-subtitle>Consultez, revoyez ou poursuivez vos déclarations existantes</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="declarations-table-container">
+        <table class="declarations-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Période d'Exercice</th>
+              <th>Date de Dépôt</th>
+              <th>Résultat Net</th>
+              <th>Impôt Dû</th>
+              <th>Pénalités</th>
+              <th>Statut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let dec of declarations">
+              <td><strong>#{{ dec.id }}</strong></td>
+              <td>{{ dec.dateDebutExercice }} au {{ dec.dateFinExercice }}</td>
+              <td>{{ dec.dateDepot ? dec.dateDepot : 'Non déposée' }}</td>
+              <td [class.positive]="dec.resultatNet >= 0" [class.negative]="dec.resultatNet < 0">
+                {{ dec.resultatNet | number:'1.2-2' }} DH
+              </td>
+              <td><strong>{{ dec.montantImpot | number:'1.2-2' }} DH</strong></td>
+              <td [class.negative]="dec.penaliteRetard > 0">
+                {{ dec.penaliteRetard | number:'1.2-2' }} DH
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="dec.statut.toLowerCase()">
+                  {{ dec.statut === 'DEPOSEE' ? 'DÉPOSÉE' : (dec.statut === 'VALIDEE' ? 'VALIDÉE' : 'BROUILLON') }}
+                </span>
+              </td>
+              <td>
+                <button *ngIf="dec.statut === 'DEPOSEE' || dec.statut === 'VALIDEE'"
+                        mat-stroked-button color="primary" class="action-btn view-btn"
+                        (click)="viewDeclaration(dec.id)" title="Revoir la déclaration déposée">
+                  <mat-icon>visibility</mat-icon>
+                  Revoir
+                </button>
+                <button *ngIf="dec.statut === 'BROUILLON'"
+                        mat-flat-button color="accent" class="action-btn edit-btn"
+                        (click)="editDeclaration(dec.id)" title="Modifier et finaliser le brouillon">
+                  <mat-icon>edit</mat-icon>
+                  Poursuivre
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Section 2 : Formulaire d'un nouvel exercice -->
   <mat-card class="form-card animate-card">
     <mat-card-header>
       <div class="header-icon-container">
-        <mat-icon class="header-icon">date_range</mat-icon>
+        <mat-icon class="header-icon">add_task</mat-icon>
       </div>
-      <mat-card-title>Période de l'Exercice Fiscal</mat-card-title>
-      <mat-card-subtitle>Déterminez les dates de début et de fin de l'exercice comptable à déclarer</mat-card-subtitle>
+      <mat-card-title>Nouvelle Déclaration Fiscales</mat-card-title>
+      <mat-card-subtitle>Déterminez la période d'exercice comptable pour créer une nouvelle déclaration</mat-card-subtitle>
     </mat-card-header>
     
     <mat-card-content>
@@ -85,7 +148,7 @@
     
     <mat-card-actions align="end" class="card-actions">
       <button mat-flat-button class="next-btn" (click)="next()" [disabled]="exerciceForm.invalid">
-        Suivant : Déclaration des flux
+        Saisir les flux (Produits & Charges)
         <mat-icon>arrow_forward</mat-icon>
       </button>
     </mat-card-actions>

@@ -10,7 +10,7 @@
   <div class="navbar-right">
     <div class="user-badge">
       <mat-icon>account_circle</mat-icon>
-      <span>Contribuable IF: 12345678</span>
+      <span>Contribuable IF: {{ numeroFiscal }}</span>
     </div>
     <button mat-icon-button (click)="logout()" title="Se déconnecter" class="logout-btn">
       <mat-icon>logout</mat-icon>
@@ -19,6 +19,35 @@
 </header>
 
 <div class="page-container">
+
+  <!-- Header Navigation & Status Bar -->
+  <div class="declaration-header-bar">
+    <button mat-stroked-button class="back-btn" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Retour à l'historique
+    </button>
+
+    <div class="header-status-badge" *ngIf="declarationId">
+      <span class="status-title">Déclaration #{{ declarationId }}</span>
+      <span class="status-chip" [ngClass]="statutDeclaration.toLowerCase()">
+        {{ statutDeclaration === 'DEPOSEE' ? 'DÉPOSÉE' : (statutDeclaration === 'RECTIFIEE' ? 'RECTIFIÉE' : (statutDeclaration === 'VALIDEE' ? 'VALIDÉE' : 'BROUILLON')) }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Banner d'Information si Déclaration Déposée/Rectifiée en Lecture Seule -->
+  <div class="status-banner deposited-banner" *ngIf="isReadOnly">
+    <mat-icon class="banner-icon">verified</mat-icon>
+    <div class="banner-text">
+      <strong>Déclaration {{ statutDeclaration === 'RECTIFIEE' ? 'Rectifiée' : 'Déposée' }} auprès de la DGI</strong>
+      <p>Cette déclaration a été transmise le <strong>{{ dateDepot }}</strong>. Vous pouvez la consulter ci-dessous ou cliquer sur <strong>"Modifier / Rectifier"</strong> pour apporter une correction.</p>
+    </div>
+    <button mat-flat-button color="accent" class="unlock-btn" (click)="enableEditMode()">
+      <mat-icon>edit</mat-icon>
+      Modifier / Rectifier
+    </button>
+  </div>
+
   <!-- Stepper de progression -->
   <div class="dgi-stepper">
     <div class="step completed">
@@ -31,14 +60,14 @@
       <span>Exercice Fiscal</span>
     </div>
     <div class="step-divider active"></div>
-    <div class="step active">
+    <div class="step" [class.completed]="isReadOnly" [class.active]="!isReadOnly">
       <div class="step-number">3</div>
       <span>Déclaration</span>
     </div>
   </div>
 
   <div class="declaration-layout">
-    <form [formGroup]="declarationForm" (ngSubmit)="submitDeclaration()" class="declaration-form">
+    <form [formGroup]="declarationForm" class="declaration-form">
       
       <!-- Left Column: Forms -->
       <div class="forms-column">
@@ -49,30 +78,30 @@
               <mat-icon>trending_up</mat-icon>
             </div>
             <mat-card-title>Produits (Recettes)</mat-card-title>
-            <mat-card-subtitle>Déclarez l'ensemble des produits d'exploitation encaissés durant l'exercice</mat-card-subtitle>
+            <mat-card-subtitle>Ensemble des produits d'exploitation encaissés durant l'exercice ({{ dateDebutExercice }} au {{ dateFinExercice }})</mat-card-subtitle>
           </mat-card-header>
 
           <mat-card-content>
             <div class="ledger-header">
               <div class="col-libelle">Désignation du Produit</div>
               <div class="col-montant">Montant (DH)</div>
-              <div class="col-actions"></div>
+              <div class="col-actions" *ngIf="!isReadOnly"></div>
             </div>
 
             <div formArrayName="produits" class="ledger-rows">
               <div *ngFor="let prod of produits.controls; let i = index" [formGroupName]="i" class="ledger-row animate-row">
                 <div class="col-libelle">
                   <mat-form-field appearance="outline" class="inline-field">
-                    <input matInput formControlName="libelle" placeholder="Ex: Vente de marchandises">
+                    <input matInput formControlName="libelle" placeholder="Ex: Vente de marchandises" [readonly]="isReadOnly">
                   </mat-form-field>
                 </div>
                 <div class="col-montant">
                   <mat-form-field appearance="outline" class="inline-field">
-                    <input matInput type="number" formControlName="montant" placeholder="0.00" (input)="calculateTotals()">
+                    <input matInput type="number" formControlName="montant" placeholder="0.00" (input)="calculateTotals()" [readonly]="isReadOnly">
                     <span matSuffix class="dh-suffix">DH</span>
                   </mat-form-field>
                 </div>
-                <div class="col-actions">
+                <div class="col-actions" *ngIf="!isReadOnly">
                   <button mat-icon-button type="button" class="row-delete-btn" (click)="removeProduit(i); calculateTotals()" title="Supprimer la ligne">
                     <mat-icon>delete_outline</mat-icon>
                   </button>
@@ -80,7 +109,7 @@
               </div>
             </div>
 
-            <button mat-stroked-button class="add-row-btn" type="button" (click)="addProduit()">
+            <button *ngIf="!isReadOnly" mat-stroked-button class="add-row-btn" type="button" (click)="addProduit()">
               <mat-icon>add</mat-icon>
               Ajouter une ligne de produit
             </button>
@@ -94,30 +123,30 @@
               <mat-icon>trending_down</mat-icon>
             </div>
             <mat-card-title>Charges (Dépenses)</mat-card-title>
-            <mat-card-subtitle>Déclarez l'ensemble des charges d'exploitation déductibles engagées</mat-card-subtitle>
+            <mat-card-subtitle>Ensemble des charges d'exploitation déductibles engagées durant l'exercice</mat-card-subtitle>
           </mat-card-header>
 
           <mat-card-content>
             <div class="ledger-header">
               <div class="col-libelle">Nature de la Charge</div>
               <div class="col-montant">Montant (DH)</div>
-              <div class="col-actions"></div>
+              <div class="col-actions" *ngIf="!isReadOnly"></div>
             </div>
 
             <div formArrayName="charges" class="ledger-rows">
               <div *ngFor="let charge of charges.controls; let i = index" [formGroupName]="i" class="ledger-row animate-row">
                 <div class="col-libelle">
                   <mat-form-field appearance="outline" class="inline-field">
-                    <input matInput formControlName="libelle" placeholder="Ex: Achats de matières premières">
+                    <input matInput formControlName="libelle" placeholder="Ex: Achats de matières premières" [readonly]="isReadOnly">
                   </mat-form-field>
                 </div>
                 <div class="col-montant">
                   <mat-form-field appearance="outline" class="inline-field">
-                    <input matInput type="number" formControlName="montant" placeholder="0.00" (input)="calculateTotals()">
+                    <input matInput type="number" formControlName="montant" placeholder="0.00" (input)="calculateTotals()" [readonly]="isReadOnly">
                     <span matSuffix class="dh-suffix">DH</span>
                   </mat-form-field>
                 </div>
-                <div class="col-actions">
+                <div class="col-actions" *ngIf="!isReadOnly">
                   <button mat-icon-button type="button" class="row-delete-btn" (click)="removeCharge(i); calculateTotals()" title="Supprimer la ligne">
                     <mat-icon>delete_outline</mat-icon>
                   </button>
@@ -125,7 +154,7 @@
               </div>
             </div>
 
-            <button mat-stroked-button class="add-row-btn" type="button" (click)="addCharge()">
+            <button *ngIf="!isReadOnly" mat-stroked-button class="add-row-btn" type="button" (click)="addCharge()">
               <mat-icon>add</mat-icon>
               Ajouter une ligne de charge
             </button>
@@ -133,7 +162,7 @@
         </mat-card>
       </div>
 
-      <!-- Right Column: Live Summary -->
+      <!-- Right Column: Live Summary & Actions -->
       <div class="summary-column">
         <mat-card class="summary-card animate-card">
           <mat-card-header>
@@ -204,10 +233,28 @@
             </div>
           </mat-card-content>
 
-          <mat-card-actions class="card-actions">
-            <button mat-flat-button type="submit" class="submit-declaration-btn" [disabled]="declarationForm.invalid">
+          <!-- Boutons d'Action selon le Cycle de Vie -->
+          <mat-card-actions class="card-actions-column" *ngIf="!isReadOnly">
+            <button mat-flat-button color="primary" type="button" class="action-btn-main deposit-btn" (click)="submitDeclaration()" [disabled]="declarationForm.invalid">
               <mat-icon>send</mat-icon>
-              Déposer Officiellement
+              {{ statutDeclaration === 'DEPOSEE' || statutDeclaration === 'RECTIFIEE' ? 'Déposer la Rectification' : 'Déposer Officiellement' }}
+            </button>
+
+            <button mat-stroked-button color="accent" type="button" class="action-btn-sec validate-btn" (click)="validateDeclaration()" [disabled]="declarationForm.invalid">
+              <mat-icon>check_circle</mat-icon>
+              Valider la Déclaration
+            </button>
+
+            <button mat-stroked-button type="button" class="action-btn-sec draft-btn" (click)="saveDraft()" [disabled]="declarationForm.invalid">
+              <mat-icon>save</mat-icon>
+              Enregistrer le Brouillon
+            </button>
+          </mat-card-actions>
+
+          <mat-card-actions class="card-actions" *ngIf="isReadOnly">
+            <button mat-flat-button color="accent" type="button" class="unlock-btn-full" (click)="enableEditMode()">
+              <mat-icon>edit</mat-icon>
+              Rectifier cette Déclaration
             </button>
           </mat-card-actions>
         </mat-card>

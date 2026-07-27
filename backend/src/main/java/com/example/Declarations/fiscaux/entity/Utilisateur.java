@@ -26,6 +26,9 @@ public class Utilisateur {
     @Column(name = "mot_de_passe_hash", nullable = false)
     private String motDePasseHash; // hash Argon2id complet (contient deja le salt)
 
+    @Column(name = "salt", nullable = false)
+    private String salt;
+
     @Column(name = "raison_sociale")
     private String raisonSociale;
 

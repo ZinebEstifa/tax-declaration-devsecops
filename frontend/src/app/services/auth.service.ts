@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -33,26 +34,36 @@ export class AuthService {
       return of({ error: 'Compte bloqué suite à 3 tentatives échouées.' });
     }
 
-    // Simulation backend (à remplacer plus tard par un vrai appel HTTP)
-    if (numFiscal === '12345678' && password === 'Password123!') {
-      this.failAttempts = 0;
-      this.isBlocked = false;
-      if (typeof window !== 'undefined' && window.sessionStorage) {
-        sessionStorage.setItem('token', 'fake-jwt-token');
-        sessionStorage.setItem('isBlocked', 'false');
-      }
-      return of({ success: true, token: 'fake-jwt-token' });
-    } else {
-      this.failAttempts++;
-      this.saveSessionState();
-      
-      if (this.failAttempts >= 3) {
-        this.isBlocked = true;
-        this.saveSessionState();
-        return of({ error: 'Compte bloqué définitivement.' });
-      }
-      return of({ error: `Échec. Il vous reste ${3 - this.failAttempts} tentatives.` });
-    }
+    return this.http.post<any>(`${this.apiUrl}/login`, { numFiscal, password }).pipe(
+      tap((res) => {
+        if (res.success && res.token) {
+          this.failAttempts = 0;
+          this.isBlocked = false;
+          if (typeof window !== 'undefined' && window.sessionStorage) {
+            sessionStorage.setItem('token', res.token);
+            sessionStorage.setItem('numeroFiscal', res.numeroFiscal || numFiscal);
+            sessionStorage.setItem('failAttempts', '0');
+            sessionStorage.setItem('isBlocked', 'false');
+          }
+        }
+      }),
+      catchError((err) => {
+        const errorMsg = err.error?.error || 'Échec de la connexion.';
+        if (err.status === 403) {
+          this.isBlocked = true;
+          this.failAttempts = 3;
+          this.saveSessionState();
+        } else if (err.status === 401) {
+          this.failAttempts++;
+          this.saveSessionState();
+          if (this.failAttempts >= 3) {
+            this.isBlocked = true;
+            this.saveSessionState();
+          }
+        }
+        return of({ success: false, error: errorMsg });
+      })
+    );
   }
 
   isAuthenticated(): boolean {
