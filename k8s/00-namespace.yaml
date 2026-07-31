@@ -1,0 +1,14 @@
+# ==============================================================================
+# ☸️ KUBERNETES MANIFEST - 00: NAMESPACE & POD SECURITY ADMISSION
+# ==============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: simpl-is
+  labels:
+    name: simpl-is
+    environment: production
+    # 🔒 Sécurité DevSecOps : Application du standard de sécurité Pod "restricted"
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/warn: restricted
