@@ -1,0 +1,142 @@
+# ==============================================================================
+# ☸️ KUBERNETES MANIFEST - 02: POSTGRESQL PERSISTENCE, DEPLOYMENT & SERVICE
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. PERSISTENT VOLUME CLAIM (Persistance des données de la BDD)
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: simpl-is
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+# ------------------------------------------------------------------------------
+# 2. DEPLOYMENT (PostgreSQL 16 - Hardened DevSecOps)
+# ------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+  namespace: simpl-is
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      # 🔒 Sécurité du Pod (Non-root user PostgreSQL = 70)
+      securityContext:
+        runAsUser: 70
+        runAsGroup: 70
+        fsGroup: 70
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+
+          # 🔒 Sécurité du Conteneur (Durcissement DevSecOps)
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false # Requis pour la création des fichiers d'état Postgres
+            capabilities:
+              drop:
+                - ALL
+
+          # Variables d'environnement injectées depuis ConfigMap et Secret
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: simplis-config
+                  key: DB_NAME
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: simplis-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: simplis-secrets
+                  key: POSTGRES_PASSWORD
+
+          ports:
+            - containerPort: 5432
+              name: postgres
+
+          # Volume persistant monté pour conserver la BDD
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+
+          # Limites de ressources (Protection contre les dénis de service DoS)
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          # Healthchecks natifs K8s
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+                - -d
+                - taxdb
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - postgres
+                - -d
+                - taxdb
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+
+---
+# ------------------------------------------------------------------------------
+# 3. SERVICE (Exposition interne de PostgreSQL)
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: simpl-is
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres
