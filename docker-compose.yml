@@ -1,0 +1,91 @@
+version: '3.8'
+
+# ==============================================================================
+# 🐳 DOCKER COMPOSE - SIMPL-IS DEVSECOPS FULL STACK ENVIRONMENT
+# ==============================================================================
+# Orchestration locale : PostgreSQL 16 + Backend Spring Boot + Frontend Angular Nginx
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Base de Données PostgreSQL
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: simplis-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: taxdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_secure_pwd_2026_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - simplis-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d taxdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------------------------
+  # 2. Backend Spring Boot (API RESTful)
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: simplis-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: taxdb
+      DB_USER: postgres
+      DB_PASSWORD: postgres_secure_pwd_2026_dev
+      JWT_SECRET: c3VwZXJfc2VjcmV0X2p3dF9zaWduaW5nX2tleV9mb3JfZGV2c2Vjb3Bz
+      ARGON2_PEPPER: c2ltcGxfaXNfc2VjcmV0X3BlcHBlcl9rZXlfMjAyNg==
+    ports:
+      - "8080:8080"
+    networks:
+      - simplis-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ----------------------------------------------------------------------------
+  # 3. Frontend Angular 19 (Nginx Web Server)
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: simplis-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - simplis-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+networks:
+  simplis-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,142 @@
+# ==============================================================================
+# ☸️ KUBERNETES MANIFEST - 04: FRONTEND ANGULAR / NGINX (DEPLOYMENT, SERVICE & HPA)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. DEPLOYMENT (Frontend Angular 19 / Nginx - DevSecOps Hardened)
+# ------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: simpl-is
+  labels:
+    app: frontend
+    tier: ui
+    security.devsecops: "high"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: frontend
+        tier: ui
+    spec:
+      # 🔒 Sécurité du Pod (Non-root Nginx UID 101)
+      securityContext:
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: frontend
+          image: simplis-frontend:latest
+          imagePullPolicy: IfNotPresent
+
+          # 🔒 Sécurité du Conteneur (Durcissement DevSecOps)
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          ports:
+            - containerPort: 80
+              name: http-ui
+
+          # Volumes requis en écriture pour Nginx non-root avec readOnlyRootFilesystem
+          volumeMounts:
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /var/run
+            - name: tmp-volume
+              mountPath: /tmp
+
+          # Limites de ressources
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "128Mi"
+
+          # Healthchecks Nginx
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+      volumes:
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
+        - name: tmp-volume
+          emptyDir: {}
+
+---
+# ------------------------------------------------------------------------------
+# 2. SERVICE (Exposition interne du Frontend UI)
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: simpl-is
+  labels:
+    app: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http-ui
+      protocol: TCP
+
+---
+# ------------------------------------------------------------------------------
+# 3. HORIZONTAL POD AUTOSCALER (Auto-scaling du Frontend)
+# ------------------------------------------------------------------------------
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend-hpa
+  namespace: simpl-is
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend-deployment
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75

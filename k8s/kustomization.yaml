@@ -1,0 +1,18 @@
+# ==============================================================================
+# ☸️ KUBERNETES KUSTOMIZATION MANIFEST
+# ==============================================================================
+# Permet le déploiement de l'ensemble des manifestes via `kubectl apply -k k8s/`
+# ==============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: simpl-is
+
+resources:
+  - 00-namespace.yaml
+  - 01-postgres-config-secret.yaml
+  - 02-postgres-deployment.yaml
+  - 03-backend-deployment.yaml
+  - 04-frontend-deployment.yaml
+  - 05-ingress.yaml
+  - 06-network-policy.yaml

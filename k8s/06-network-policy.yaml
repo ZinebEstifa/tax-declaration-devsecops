@@ -1,0 +1,130 @@
+# ==============================================================================
+# ☸️ KUBERNETES MANIFEST - 06: NETWORK POLICIES (ZERO TRUST NETWORK SECURITY)
+# ==============================================================================
+# Micro-segmentation du réseau pour restreindre le trafic entre les composants
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. DEFAULT DENY ALL (Verrouillage global - Aucun trafic non explicité)
+# ------------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: simpl-is
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+---
+# ------------------------------------------------------------------------------
+# 2. ALLOW DNS EGRESS (Autoriser tous les Pods à effectuer des requêtes DNS)
+# ------------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: simpl-is
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# ------------------------------------------------------------------------------
+# 3. FRONTEND NETWORK POLICY (Autorise Ingress externe & Egress vers Backend)
+# ------------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-network-policy
+  namespace: simpl-is
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Autoriser l'Ingress HTTP/HTTPS venant du controller ou de n'importe quel client externe
+    - ports:
+        - protocol: TCP
+          port: 80
+  egress:
+    # Autoriser le Frontend à contacter le Backend API sur le port 8080
+    - to:
+        - podSelector:
+            matchLabels:
+              app: backend
+      ports:
+        - protocol: TCP
+          port: 8080
+
+---
+# ------------------------------------------------------------------------------
+# 4. BACKEND NETWORK POLICY (Autorise Ingress depuis Frontend & Egress vers DB)
+# ------------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-network-policy
+  namespace: simpl-is
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Autoriser uniquement le Frontend (et l'Ingress) à contacter l'API Backend
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    # Autoriser le Backend à contacter uniquement la base de données PostgreSQL sur 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+
+---
+# ------------------------------------------------------------------------------
+# 5. POSTGRES NETWORK POLICY (Strictement accessible UNIQUEMENT par le Backend)
+# ------------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-network-policy
+  namespace: simpl-is
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    # Autoriser UNIQUEMENT les connexions entrantes provenant des Pods Backend
+    - from:
+        - podSelector:
+            matchLabels:
+              app: backend
+      ports:
+        - protocol: TCP
+          port: 5432
