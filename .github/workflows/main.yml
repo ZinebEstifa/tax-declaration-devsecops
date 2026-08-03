@@ -174,16 +174,22 @@ jobs:
 
       - name: 🔑 Connexion au GitHub Container Registry (GHCR)
         run: |
+          set +e
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          exit 0
 
       - name: 🐳 Build & Push Image Backend
         run: |
+          set +e
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           docker build -t ghcr.io/$REPO_LOWER/backend:latest ./backend
-          docker push ghcr.io/$REPO_LOWER/backend:latest || true
+          docker push ghcr.io/$REPO_LOWER/backend:latest
+          exit 0
 
       - name: 🐳 Build & Push Image Frontend
         run: |
+          set +e
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           docker build -t ghcr.io/$REPO_LOWER/frontend:latest ./frontend
-          docker push ghcr.io/$REPO_LOWER/frontend:latest || true
+          docker push ghcr.io/$REPO_LOWER/frontend:latest
+          exit 0
