@@ -6,10 +6,14 @@ on:
   pull_request:
     branches: [ "main", "master" ]
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   REGISTRY: ghcr.io
-  IMAGE_BACKEND: ${{ github.repository }}/backend
-  IMAGE_FRONTEND: ${{ github.repository }}/frontend
+  IMAGE_BACKEND: zinebestifa/tax-declaration-devsecops/backend
+  IMAGE_FRONTEND: zinebestifa/tax-declaration-devsecops/frontend
 
 jobs:
   # ============================================================================
