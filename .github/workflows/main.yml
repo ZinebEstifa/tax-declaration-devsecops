@@ -70,11 +70,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: 📦 Installer les dépendances
         run: |
           cd frontend
-          npm install --legacy-peer-deps
+          npm ci || npm install --legacy-peer-deps
 
       - name: 🛡️ Audit de sécurité des packages (npm audit)
         run: |
@@ -84,7 +86,7 @@ jobs:
       - name: 🏗️ Compilation sécurisée Angular Production
         run: |
           cd frontend
-          npx ng build --configuration=production
+          npm run build
 
   # ============================================================================
   # 🔒 ÉTAPE 4 : SÉCURITÉ DES MANIFESTES KUBERNETES (IaC Security Scan)
