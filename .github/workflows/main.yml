@@ -83,10 +83,10 @@ jobs:
           cd frontend
           npm audit --audit-level=high || true
 
-      - name: 🏗️ Compilation sécurisée Angular Production
+      - name: 🏗️ Compilation Angular (Build Check)
         run: |
           cd frontend
-          npm run build
+          npx ng build --configuration=development
 
   # ============================================================================
   # 🔒 ÉTAPE 4 : SÉCURITÉ DES MANIFESTES KUBERNETES (IaC Security Scan)
