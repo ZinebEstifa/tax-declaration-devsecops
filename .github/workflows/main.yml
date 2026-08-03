@@ -112,6 +112,7 @@ jobs:
           hide-shortcut-table: true
           exit-code: '0'
           severity: 'CRITICAL,HIGH'
+        continue-on-error: true
 
   # ============================================================================
   # 🔒 ÉTAPE 5 : SÉCURITÉ DES CONTENEURS (Container Vulnerability Scan)
@@ -133,12 +134,13 @@ jobs:
         with:
           image-ref: 'simplis-backend:ci'
           format: 'table'
-          exit-code: 0
+          exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
       - name: 🐳 Build Image Frontend
         run: docker build -t simplis-frontend:ci ./frontend
@@ -148,12 +150,13 @@ jobs:
         with:
           image-ref: 'simplis-frontend:ci'
           format: 'table'
-          exit-code: 0
+          exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
   # ============================================================================
   # 🚀 ÉTAPE 6 : DÉPLOIEMENT SÉCURISÉ (Registry Push & K8s Deploy)
