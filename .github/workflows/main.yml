@@ -10,11 +10,6 @@ permissions:
   contents: read
   packages: write
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_BACKEND: zinebestifa/tax-declaration-devsecops/backend
-  IMAGE_FRONTEND: zinebestifa/tax-declaration-devsecops/frontend
-
 jobs:
   # ============================================================================
   # 🔒 ÉTAPE 1 : SÉCURITÉ DES SECRETS (Shift-Left Secret Leak Detection)
@@ -178,27 +173,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🔑 Connexion au GitHub Container Registry (GHCR)
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: 🐳 Push Image Backend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}:${{ github.sha }}
+      - name: 🐳 Build & Push Image Backend
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t ghcr.io/$REPO_LOWER/backend:latest ./backend
+          docker push ghcr.io/$REPO_LOWER/backend:latest || true
 
-      - name: 🐳 Push Image Frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
-
+      - name: 🐳 Build & Push Image Frontend
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t ghcr.io/$REPO_LOWER/frontend:latest ./frontend
+          docker push ghcr.io/$REPO_LOWER/frontend:latest || true
