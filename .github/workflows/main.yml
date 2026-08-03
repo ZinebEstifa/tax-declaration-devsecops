@@ -105,7 +105,7 @@ jobs:
           kubectl kustomize k8s/
 
       - name: 🛡️ Scan de sécurité des manifestes K8s (Trivy IaC)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
           scan-ref: 'k8s'
@@ -129,7 +129,7 @@ jobs:
         run: docker build -t simplis-backend:ci ./backend
 
       - name: 🔍 Scan Sécurité Image Backend
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'simplis-backend:ci'
           format: 'table'
@@ -141,7 +141,7 @@ jobs:
         run: docker build -t simplis-frontend:ci ./frontend
 
       - name: 🔍 Scan Sécurité Image Frontend
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'simplis-frontend:ci'
           format: 'table'
