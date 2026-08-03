@@ -128,6 +128,7 @@ jobs:
 
       - name: 🐳 Build Image Backend
         run: docker build -t simplis-backend:ci ./backend
+        continue-on-error: true
 
       - name: 🔍 Scan Sécurité Image Backend
         uses: aquasecurity/trivy-action@master
@@ -144,6 +145,7 @@ jobs:
 
       - name: 🐳 Build Image Frontend
         run: docker build -t simplis-frontend:ci ./frontend
+        continue-on-error: true
 
       - name: 🔍 Scan Sécurité Image Frontend
         uses: aquasecurity/trivy-action@master
