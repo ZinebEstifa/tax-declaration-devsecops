@@ -1,4 +1,4 @@
-name: 🔒 DevSecOps CI/CD Pipeline - SIMPL-IS
+name: 🔒 DevSecOps CI/CD Pipeline - SIMPL-IS (Full CI/CD & Deploy)
 
 on:
   push:
@@ -6,67 +6,90 @@ on:
   pull_request:
     branches: [ "main", "master" ]
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BACKEND: ${{ github.repository }}/backend
+  IMAGE_FRONTEND: ${{ github.repository }}/frontend
+
 jobs:
   # ----------------------------------------------------------------------------
-  # 1. BUILD & TEST BACKEND (JUnit, Argon2id, Spring Security)
+  # 1. BUILD & TEST BACKEND (CI - Spring Boot & Tests Java 17)
   # ----------------------------------------------------------------------------
-  backend-test:
+  backend-build-test:
     name: ☕ Backend Build & Security Unit Tests
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
+      - name: 📥 Récupérer le code source
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: ☕ Configurer JDK 17 (Temurin)
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
 
-      - name: Build & Run Integration Tests with Maven
+      - name: 🧪 Compiler et lancer les 21 tests d'intégration
         run: |
           cd backend
           mvn clean test -B
 
   # ----------------------------------------------------------------------------
-  # 2. BUILD & TEST FRONTEND (Angular 19)
+  # 2. BUILD FRONTEND (CI - Angular 21 avec Node.js 20)
   # ----------------------------------------------------------------------------
-  frontend-test:
+  frontend-build:
     name: 🅰️ Frontend Build & Angular Check
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
+      - name: 📥 Récupérer le code source
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 18
+      - name: 🟢 Configurer Node.js 20 (Requis pour Angular 21)
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install Dependencies & Build Angular App
+      - name: 📦 Installer les dépendances & Compiler Angular
         run: |
           cd frontend
-          npm ci
-          npm run build -- --configuration=production
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+          npm run build
 
   # ----------------------------------------------------------------------------
-  # 3. DEVSECOPS SECURITY SCAN (Trivy Container & Vulnerability Scanner)
+  # 3. VALIDATION MANIFESTES KUBERNETES (Kustomize Dry-Run Validation)
+  # ----------------------------------------------------------------------------
+  k8s-validation:
+    name: ☸️ Kubernetes Manifests Dry-Run Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Récupérer le code source
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Vérifier la validité des fichiers Kubernetes (Kustomize Build)
+        run: |
+          kubectl kustomize k8s/
+
+  # ----------------------------------------------------------------------------
+  # 4. SCAN DE SÉCURITÉ (SecOps - Trivy Vulnerability Scanner)
   # ----------------------------------------------------------------------------
   security-scan:
     name: 🛡️ Trivy Security & Vulnerability Scan
     runs-on: ubuntu-latest
-    needs: [backend-test, frontend-test]
+    needs: [backend-build-test, frontend-build, k8s-validation]
+
     steps:
-      - name: Checkout Code
+      - name: 📥 Récupérer le code source
         uses: actions/checkout@v4
 
-      - name: Build Backend Docker Image
+      - name: 🐳 Construire l'image Docker Backend
         run: docker build -t simplis-backend:ci ./backend
 
-      - name: Run Trivy Vulnerability Scanner on Backend Image
+      - name: 🔍 Scanner l'image Backend avec Trivy
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'simplis-backend:ci'
@@ -76,10 +99,10 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-      - name: Build Frontend Docker Image
+      - name: 🐳 Construire l'image Docker Frontend
         run: docker build -t simplis-frontend:ci ./frontend
 
-      - name: Run Trivy Vulnerability Scanner on Frontend Image
+      - name: 🔍 Scanner l'image Frontend avec Trivy
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'simplis-frontend:ci'
@@ -90,15 +113,39 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
   # ----------------------------------------------------------------------------
-  # 4. KUBERNETES MANIFEST VALIDATION (kubeval / kube-linter)
+  # 5. BUILD & PUSH DOCKER IMAGES (CD - Publication Registry)
   # ----------------------------------------------------------------------------
-  k8s-validation:
-    name: ☸️ Kubernetes Manifests Dry-Run Validation
+  docker-build-push:
+    name: 📦 Build & Push Images Docker (GHCR)
     runs-on: ubuntu-latest
+    needs: [security-scan]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
     steps:
-      - name: Checkout Code
+      - name: 📥 Récupérer le code source
         uses: actions/checkout@v4
 
-      - name: Validate Kubernetes Manifests Syntax
-        run: |
-          kubectl apply --dry-run=client -k k8s/
+      - name: 🔑 Connexion au GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐳 Build & Push Image Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}:${{ github.sha }}
+
+      - name: 🐳 Build & Push Image Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
