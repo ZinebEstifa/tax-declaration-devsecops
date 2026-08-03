@@ -133,9 +133,12 @@ jobs:
         with:
           image-ref: 'simplis-backend:ci'
           format: 'table'
-          exit-code: '0'
+          exit-code: 0
           ignore-unfixed: true
+          vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🐳 Build Image Frontend
         run: docker build -t simplis-frontend:ci ./frontend
@@ -145,9 +148,12 @@ jobs:
         with:
           image-ref: 'simplis-frontend:ci'
           format: 'table'
-          exit-code: '0'
+          exit-code: 0
           ignore-unfixed: true
+          vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ============================================================================
   # 🚀 ÉTAPE 6 : DÉPLOIEMENT SÉCURISÉ (Registry Push & K8s Deploy)
@@ -186,4 +192,3 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
-
