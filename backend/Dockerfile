@@ -11,7 +11,7 @@ FROM maven:3.9.6-eclipse-temurin-17-alpine AS builder
 
 WORKDIR /app
 
-# Cache des dépendances Maven (Copie explicite du pom.xml)
+# Cache des dépendances Maven
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
@@ -32,8 +32,8 @@ WORKDIR /app
 # Sécurité DevSecOps : Création d'un utilisateur et groupe non-root
 RUN addgroup -S spring && adduser -S spring -G spring
 
-# Copie du JAR depuis l'étape de compilation
-COPY --from=builder /app/target/Declarations-fiscaux-0.0.1-SNAPSHOT.jar app.jar
+# Copie du JAR depuis l'étape de compilation (utilisation du wildcard *.jar)
+COPY --from=builder /app/target/*.jar app.jar
 
 # Attribution des permissions à l'utilisateur non-root
 RUN chown -R spring:spring /app

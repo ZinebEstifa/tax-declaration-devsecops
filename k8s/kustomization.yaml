@@ -1,12 +1,5 @@
-# ==============================================================================
-# ☸️ KUBERNETES KUSTOMIZATION MANIFEST
-# ==============================================================================
-# Permet le déploiement de l'ensemble des manifestes via `kubectl apply -k k8s/`
-# ==============================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
-namespace: simpl-is
 
 resources:
   - 00-namespace.yaml

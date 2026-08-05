@@ -8,7 +8,7 @@ version: '3.8'
 
 services:
   # ----------------------------------------------------------------------------
-  # 1. Base de Données PostgreSQL
+  # 1. Base de Données PostgreSQL (Port hôte 5433 pour éviter les conflits)
   # ----------------------------------------------------------------------------
   postgres:
     image: postgres:16-alpine
@@ -19,7 +19,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres_secure_pwd_2026_dev
     ports:
-      - "5432:5432"
+      - "5433:5432" # Mappé sur le port hôte 5433 pour éviter le conflit 5432 Windows
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -62,7 +62,7 @@ services:
       retries: 3
 
   # ----------------------------------------------------------------------------
-  # 3. Frontend Angular 19 (Nginx Web Server)
+  # 3. Frontend Angular 21 (Nginx Web Server)
   # ----------------------------------------------------------------------------
   frontend:
     build:

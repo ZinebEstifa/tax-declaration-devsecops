@@ -5,7 +5,9 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class TaxService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/declarations';
+  private apiUrl = (typeof window !== 'undefined' && window.location.port === '') 
+    ? '/api/declarations' 
+    : 'http://localhost:8080/api/declarations';
   
   // Règle métier 1 : Calcul du Résultat Net
   calculateNetResult(products: number, charges: number): number {

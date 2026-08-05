@@ -5,7 +5,9 @@ import { tap, catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/auth';
+  private apiUrl = (typeof window !== 'undefined' && window.location.port === '') 
+    ? '/api/auth' 
+    : 'http://localhost:8080/api/auth';
   private failAttempts = 0;
   private isBlocked = false;
 
